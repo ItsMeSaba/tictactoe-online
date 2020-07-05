@@ -1,0 +1,114 @@
+* {
+    padding: 0;
+    margin: 0;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    user-select: none;
+}
+
+body {
+    overflow: hidden;
+    background-color: rgb(40, 40, 40);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.gameOver {
+    display: none;
+    position: absolute;
+    /* display: flex; */
+    align-items: center;
+    justify-content: center;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    background-color: rgba(0,0,0,.9);
+}
+
+.gameOver > div {
+    color: white;
+    font-size: 3rem;
+    width: 50%;
+    height: 30%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.gameOver > div input[type='submit'] {
+    cursor: pointer;
+    color: white;
+    width: 30vw;
+    max-width: 150px;
+    height: 30px;
+    border: solid 2px rgba(231, 76, 60,1.0);
+    background-color: transparent;
+}
+
+.connection {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: white;
+    padding: 15px;
+}
+
+.timer {
+    position: absolute;
+    top: 2vw;
+    right: 2vw;
+    color: white;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.main .turn {
+    position: relative;
+    bottom: 50px;
+    color: white;
+}
+
+.main table {
+    text-align: center;
+    border-collapse: collapse;
+}
+
+.main td {
+    height: 150px;
+    width: 150px;
+    border: solid 3px white;
+    cursor: pointer;
+    color: white;
+}
+  
+
+.main table tr:first-child td {
+    border-top: none;
+}
+
+.main table tr:last-child td {
+    border-bottom: none;
+}
+
+.main table tr td:first-child {
+    border-left: none;
+}
+
+.main table tr td:last-child {
+    border-right: none;
+}
+
+@media(max-width: 800px) {
+    .main td {
+        width: 90px;
+        height: 90px;
+    }
+}
