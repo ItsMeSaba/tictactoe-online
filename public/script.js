@@ -14,6 +14,11 @@
     }
     let id = null;
 
+    let setScreenSize = () => {
+        document.documentElement.style.setProperty('--bodyHeight', `${window.innerHeight}px`)
+    }
+
+    setScreenSize();
 
     let timer = () => {
         let p = document.getElementsByClassName('timer')[0];
