@@ -12,21 +12,25 @@ let newPlayer = (id, opponent, turn) => {
     if(players[id]) {
         players[id].opponent = opponent;
         players[id].isTurn = turn;
-        players[id].positions = [0,0,0,0,0,0,0,0,0];
+        // players[id].positions = [0,0,0,0,0,0,0,0,0];
+        players[id].positions = Array(9).fill(0);
 
     } else {
         players[id] = {
             opponent : opponent,
             isTurn : turn,
-            positions : [0,0,0,0,0,0,0,0,0],
+            // positions : [0,0,0,0,0,0,0,0,0],
+            positions : Array(9).fill(0),
             intervalId : null,
             count : function() {
                 
-                let id = setTimeout(() => {
-                    gameOver(this.opponent, players[this.opponent].opponent);
-                }, 6000)
+                // let id = setTimeout(() => {
+                //     gameOver(this.opponent, players[this.opponent].opponent);
+                // }, 6000)
 
-                this.intervalId = id;
+                this.intervalId = setTimeout(() => {
+                    gameOver(this.opponent, players[this.opponent].opponent);
+                }, 6000);
             }
         }
     }
@@ -90,18 +94,18 @@ io.on('connection', socket => {
     io.to(socket.id).emit('id', socket.id);
 
     let pair = () => {
-        if(pendingUsers.length > 0) {//If There is user waiting connects to eachother 
-            let user = pendingUsers.shift(); //gets pending users id
+        if(pendingUsers.length > 0) { // If There is user waiting tries to connect to eachother 
+            let user = pendingUsers.shift(); // Gets pending users id and removes from pendings
             
             
             newPlayer(user, socket.id, false);
             newPlayer(socket.id, user, true);
             
-            io.to(socket.id).emit('user joined', true); //sends id-s of conencted users
+            io.to(socket.id).emit('user joined', true); // sends id-s of conencted users
             io.to(user).emit('user joined', false); // to each other
             
-            players[socket.id].count();
-        } else {//if there is no user w8ing he will be added to array for waiting
+            // players[socket.id].count();
+        } else { //if there is no user waiting he will be added to pending
             pendingUsers.push(socket.id);
         }
     }
@@ -114,12 +118,12 @@ io.on('connection', socket => {
         let opponent = players[player.opponent];
          
 
-        if( !player.isTurn ) {
+        if(!player.isTurn) {
             console.log('not ur turn');   
             return false;
         }
         
-        if( player.positions[data.pos] ) {
+        if(player.positions[data.pos]) {
             console.log('position taken');   
             return false;
         }
@@ -131,6 +135,7 @@ io.on('connection', socket => {
         player.isTurn = false;
 
         let didWin = () => {
+            // At least 3 plays needed for win
             if(countSpots(player.positions) < 3) return false;
 
             if(checkWin(player.positions)) {
@@ -139,22 +144,24 @@ io.on('connection', socket => {
                 return true;
             }
             
-            if(countSpots(player.positions) + countSpots(opponent.positions) == 9) {
+            // if(countSpots(player.positions) + countSpots(opponent.positions) == 9) {
+            //     gameOver(data.id, player.opponent, true);
+            
+            //     return true;
+            // } 
+
+            if([...player.positions, ...opponent.positions].reduce((acc, item) => acc + item) == 9) {
                 gameOver(data.id, player.opponent, true);
             
                 return true;
             } 
         }
 
-        if(didWin()) {
-            return true;
-        }
+        if(didWin()) return true;
 
         opponent.isTurn = true;
         
-        io.to(player.opponent).emit('play', data.pos);
-        
-        opponent.count();
+        io.to(player.opponent).emit('play', data.pos);        
     })
 
     socket.on('find new', () => {
@@ -163,11 +170,11 @@ io.on('connection', socket => {
 
     socket.on('disconnect', () => {
 
-        if(players[socket.id]) {
+        if(players[socket.id]) { // If user was paired send opponent game over event
             gameOver(players[socket.id].opponent, socket.id);
 
             delete players[socket.id];
-        } else {
+        } else { // If user wasn't paired delete from pendings
             let pendingId = pendingUsers.indexOf(socket.id);
 
             if(pendingId != -1) pendingUsers.splice(pendingId, 1);
@@ -182,4 +189,4 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 })
 
-http.listen(3000, () => console.log('Running Server'))
+http.listen(process.env.PORT || 3000, () => console.log('Running Server'))

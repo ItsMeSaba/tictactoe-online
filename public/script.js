@@ -1,11 +1,10 @@
 (() => {
-
     let td = document.getElementsByTagName('td');
     let turn = document.getElementsByClassName('turn')[0];
     let socket = io();
     let pos = {
-        mine : [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        opponent : [0, 0, 0, 0, 0, 0, 0, 0, 0]
+        mine : Array(9).fill(0),
+        opponent : Array(9).fill(0)
     }
     let urTurn = false;
     let char = {
@@ -20,34 +19,10 @@
 
     setScreenSize();
 
-    let timer = () => {
-        let p = document.getElementsByClassName('timer')[0];
-        let time = 5;
-    
-        let count = () => {
-            if(!urTurn) {
-                p.innerHTML = '';
-                return false;
-            }
-    
-            p.innerHTML = time;
-            
-            if(time == 0) {
-                return false;
-            }
-
-
-            time--; 
-    
-            setTimeout(count, 1000);
-        }
-    
-        count();
-    }
 
     let gameOver = decision => {
-        pos.mine = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-        pos.opponent = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+        pos.mine = Array(9).fill(0);
+        pos.opponent = Array(9).fill(0);
 
         urTurn = false;
 
@@ -60,13 +35,11 @@
     }
 
     socket.on('user joined', data => {
-        
-        if(data) {
+        if(data) { // Checks if you start
             urTurn = true;
             char.my = 'X';
             char.opponent = 'O';
             turn.innerHTML = 'Your Turn';
-            timer();
         } else {
             char.my = 'O';
             char.opponent = 'X';
@@ -75,7 +48,7 @@
     })
 
     socket.on('id', data => {
-        id = data;
+        id = data; // Recieving opponents id
     })
 
     socket.on('won', () => {
@@ -83,23 +56,22 @@
     })
 
     socket.on('lost', () => {
-        gameOver('lost')
+        gameOver('lost');
     })
 
     socket.on('draw', () => {
-        gameOver('draw')
+        gameOver('draw');
     })
 
     socket.on('play', data => {
 
-        pos.opponent[data] = 1;
+        pos.opponent[data] = 1; // Marking played spot
 
         td[data].innerHTML = char.opponent;
         urTurn = true;
         
         turn.innerHTML = 'Your Turn';
 
-        timer();
     })
 
     for(let i = 0; i < td.length; i++) {
@@ -109,18 +81,17 @@
                 return false;
             }
 
-            let playPos = x.target.id;
+            let playPos = x.target.id; // Gets id of clicked box
 
             
-            if(pos.mine[playPos] || pos.opponent[playPos]) {    
+            if(pos.mine[playPos] || pos.opponent[playPos]) { // Checks if spot is already taken 
                 return false;
             }
 
-            document.getElementsByClassName('timer')[0] = '';
 
             pos.mine[playPos] = 1; 
 
-            socket.emit('play', {pos : playPos, id : id});
+            socket.emit('play', {pos : playPos, id : id}); // Sends play to opponent
 
             td[playPos].innerHTML = char.my;
             urTurn = false;
